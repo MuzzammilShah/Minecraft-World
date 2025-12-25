@@ -1,16 +1,15 @@
 """Centralised configuration and block definitions for the Ursina voxel demo."""
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
 from typing import Dict, Optional
 
 from ursina import color
 
-# Asset paths
-ASSETS_DIR = Path(__file__).parent / "assets"
-TEXTURES_DIR = ASSETS_DIR / "textures"
+# Relative texture path from src folder (where main.py runs)
+TEXTURE_PATH_PREFIX = "assets/textures"
 
 
 class BlockId(str, Enum):
@@ -28,33 +27,34 @@ class BlockDefinition:
     name: BlockId
     base_color: color.Color
     highlight_color: color.Color
-    texture_name: Optional[str] = None  # Just the filename, not full path
+    texture_file: Optional[str] = None  # Filename only (e.g., "grass_top.png")
 
-
-def get_texture_path(filename: str) -> Optional[Path]:
-    """Return texture path if file exists, else None."""
-    path = TEXTURES_DIR / filename
-    return path if path.exists() else None
+    @property
+    def texture_path(self) -> Optional[str]:
+        """Get relative texture path for Ursina."""
+        if self.texture_file:
+            return f"{TEXTURE_PATH_PREFIX}/{self.texture_file}"
+        return None
 
 
 BLOCK_LIBRARY: Dict[BlockId, BlockDefinition] = {
     BlockId.GRASS: BlockDefinition(
         name=BlockId.GRASS,
-        base_color=color.rgb(95, 159, 53),
-        highlight_color=color.rgb(123, 190, 82),
-        texture_name="grass_top.png",
+        base_color=color.rgb(89, 166, 48),
+        highlight_color=color.rgb(120, 200, 80),
+        texture_file="grass_top.png",
     ),
     BlockId.DIRT: BlockDefinition(
         name=BlockId.DIRT,
-        base_color=color.rgb(151, 106, 68),
-        highlight_color=color.rgb(181, 141, 102),
-        texture_name="dirt.png",
+        base_color=color.rgb(134, 96, 67),
+        highlight_color=color.rgb(170, 130, 100),
+        texture_file="dirt.png",
     ),
     BlockId.STONE: BlockDefinition(
         name=BlockId.STONE,
-        base_color=color.rgb(130, 130, 130),
-        highlight_color=color.rgb(169, 169, 169),
-        texture_name="stone.png",
+        base_color=color.rgb(125, 125, 125),
+        highlight_color=color.rgb(160, 160, 160),
+        texture_file="stone.png",
     ),
 }
 

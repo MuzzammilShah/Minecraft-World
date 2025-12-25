@@ -1,37 +1,11 @@
 """Voxel block entity with click-aware behaviour."""
 from __future__ import annotations
 
-from typing import Callable, Dict, Optional
+from typing import Callable, Optional
 
-from ursina import Entity, Texture, Vec3, color, load_texture
+from ursina import Entity, Vec3, color
 
-from .game_config import BLOCK_LIBRARY, BlockDefinition, BlockId, get_texture_path
-
-# Cache loaded textures to avoid reloading
-_texture_cache: Dict[str, Optional[Texture]] = {}
-
-
-def _load_block_texture(texture_name: Optional[str]) -> Optional[Texture]:
-    """Load and cache a block texture."""
-    if texture_name is None:
-        return None
-    
-    if texture_name in _texture_cache:
-        return _texture_cache[texture_name]
-    
-    texture_path = get_texture_path(texture_name)
-    if texture_path and texture_path.exists():
-        try:
-            tex = load_texture(str(texture_path))
-            _texture_cache[texture_name] = tex
-            return tex
-        except Exception as e:
-            print(f"Failed to load texture {texture_name}: {e}")
-            _texture_cache[texture_name] = None
-            return None
-    
-    _texture_cache[texture_name] = None
-    return None
+from .game_config import BLOCK_LIBRARY, BlockDefinition, BlockId
 
 
 class VoxelBlock(Entity):
@@ -46,28 +20,31 @@ class VoxelBlock(Entity):
     ) -> None:
         block_definition: BlockDefinition = BLOCK_LIBRARY[block_id]
         from ursina import scene
-        # Remove parent from kwargs if present, we always parent to scene
+        
+        # Remove parent from kwargs if present
         kwargs.pop("parent", None)
         
-        # Try to load texture, fall back to color if not available
-        texture = _load_block_texture(block_definition.texture_name)
-        use_texture = texture is not None
+        # Use texture if available (relative path for Ursina)
+        texture_path = block_definition.texture_path
+        use_texture = texture_path is not None
         
         super().__init__(
             parent=scene,
             position=position,
             model="cube",
-            texture=texture,
+            texture=texture_path,
+            # Use white color with texture so texture shows properly, otherwise use base_color
             color=color.white if use_texture else block_definition.base_color,
             collider="box",
             **kwargs,
         )
+        
         self.block_id = block_id
         self.block_definition = block_definition
         self.on_destroy = on_destroy
         self._has_texture = use_texture
         self._base_color = color.white if use_texture else block_definition.base_color
-        self._highlight_color = color.rgb(200, 200, 150) if use_texture else block_definition.highlight_color
+        self._highlight_color = color.rgb(255, 255, 200) if use_texture else block_definition.highlight_color
 
     def destroy_block(self) -> None:
         """Remove the block from the scene and notify listeners."""
