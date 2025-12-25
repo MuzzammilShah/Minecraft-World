@@ -1,0 +1,29 @@
+# Python cache and build artifacts
+__pycache__/
+*.py[cod]
+*.so
+*.dylib
+*.egg
+*.egg-info/
+.eggs/
+build/
+dist/
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+.env
+
+# IDE and editor settings
+.vscode/
+.idea/
+*.swp
+
+# macOS metadata
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Ursina build output
+ursina_build/
